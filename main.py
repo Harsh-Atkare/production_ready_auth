@@ -9,7 +9,6 @@ from auth import hash_password, verify_password, create_access_token
 from config import settings
 
 # Create database tables
-models.Base.metadata.create_all(bind=engine)
 
 # Create FastAPI app
 app = FastAPI(
@@ -18,6 +17,9 @@ app = FastAPI(
     description="Simple authentication API with email-based registration"
 )
 
+@app.on_event("startup")
+def on_startup():
+    models.Base.metadata.create_all(bind=engine)
 # CORS - Allow all origins (for development)
 app.add_middleware(
     CORSMiddleware,
@@ -91,7 +93,7 @@ def login(credentials: UserLogin, db: Session = Depends(get_db)):
         models.User.username == credentials.username
     ).first()
     
-    
+
     # Verify user exists and password is correct
     if not user or not verify_password(credentials.password, user.hashed_password):
         raise HTTPException(
