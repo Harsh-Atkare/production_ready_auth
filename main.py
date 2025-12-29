@@ -44,19 +44,11 @@ def root():
 
 @app.get("/health")
 def health_check():
-    """Health check for Render"""
     return {"status": "healthy", "environment": settings.ENVIRONMENT}
 
 @app.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 def register(user: UserRegister, db: Session = Depends(get_db)):
-    """
-    Register a new user with email
-    
-    - **email**: Valid email address (unique)
-    - **username**: Username (unique, 3-50 chars)
-    - **password**: Password (minimum 8 chars)
-    - **full_name**: User's full name
-    """
+
     
     # Check if email already exists
     if db.query(models.User).filter(models.User.email == user.email).first():
@@ -98,6 +90,7 @@ def login(credentials: UserLogin, db: Session = Depends(get_db)):
     user = db.query(models.User).filter(
         models.User.username == credentials.username
     ).first()
+    
     
     # Verify user exists and password is correct
     if not user or not verify_password(credentials.password, user.hashed_password):
